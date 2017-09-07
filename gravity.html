@@ -39,20 +39,24 @@ var keyboard = [
 
 var letters = [];
 
+
 function letter(value, posX, velocity){
   this.value = value;
   this.position = {x: posX, y: 650};
   this.velocity = velocity
-  this.mass = 0.1;
-  this.radius = 25;
-  this.restitution = -0.7;
   this.life = 150;
 }
 
 var Cd = 0.47;  // Dimensionless
 var rho = 1.22; // kg / m^3
-var A = Math.PI * letter.radius * letter.radius / (10000); // m^2
+var A = Math.PI * radius * radius / (10000); // m^2
 var ag = 9.81;  // m / s^2
+
+var mass = 0.1;
+var radius = 20;
+var restitution = -0.7;
+var collision = -1;
+
 
 var keyDown = function(e) {
 
@@ -124,8 +128,8 @@ var loop = function() {
           Fy = (isNaN(Fy) ? 0 : Fy);
 
               // Calculate acceleration ( F = ma )
-          var ax = Fx / letter.mass;
-          var ay = ag + (Fy / letter.mass);
+          var ax = Fx / mass;
+          var ay = ag + (Fy / mass);
               // Integrate to get velocity
           letter.velocity.y += ay*frameRate;
           letter.velocity.x += ax*frameRate;
@@ -135,22 +139,37 @@ var loop = function() {
           letter.position.y += letter.velocity.y*frameRate*100;
 
       // Handle collisions
-      if (letter.position.y > height - letter.radius) {
-          letter.velocity.y *= letter.restitution;
-          letter.position.y = height - letter.radius;
+      if (letter.position.y > height - radius) {
+          letter.velocity.y *= restitution;
+          letter.position.y = height - radius;
       }
-      if (letter.position.y < letter.radius) {
-          letter.velocity.y *= letter.restitution;
-          letter.position.y = letter.radius;
+      if (letter.position.y < radius) {
+          letter.velocity.y *= restitution;
+          letter.position.y = radius;
       }
-      if (letter.position.x > width - letter.radius) {
-          letter.velocity.x *= letter.restitution;
-          letter.position.x = width - letter.radius;
+      if (letter.position.x > width - radius) {
+          letter.velocity.x *= restitution;
+          letter.position.x = width - radius;
       }
-      if (letter.position.x < letter.radius) {
-          letter.velocity.x *= letter.restitution;
-          letter.position.x = letter.radius;
+      if (letter.position.x < radius) {
+          letter.velocity.x *= restitution;
+          letter.position.x = radius;
       }
+
+      letters.forEach(function(other) {
+        if(letter.position.x != other.position.x){
+          var distX = Math.abs(letter.position.x - other.position.x);
+          var distY = Math.abs(letter.position.y - other.position.y);
+
+          if(distX <= radius*2 && distY <= radius*2 && letter.position.y <= 500){
+            letter.velocity.x *= -1;
+            other.velocity.x *= -1;
+            letter.velocity.y *= -1;
+            other.velocity.y *= -1;
+          }
+
+        }
+      });
 
       var alpha = 1.0;
 
