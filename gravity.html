@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Gravity Fall</title>
+  <style media="screen">
+    canvas {
+      display:block;
+      margin:20px auto;
+      border:1px solid #4286f4;
+      background-color: white;
+      border-radius: 5px;
+      height:650px;
+      width:1200px;
+    }
+
+  </style>
+</head>
+<body>
+  <canvas id="canvas" height="650" width="1200">Get a better browser!</canvas>
+</body>
+<script type="text/javascript">
+
+var width = 1200;
+var height = 650;
+var canvas = ctx = false;
+var frameRate = 1/40; // Seconds
+var frameDelay = frameRate * 1000; // ms
+var loopTimer = false;
+
+var keyboard = [
+  ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "?", "´"],
+  ["Q", "W", "E", "R", "T", "Z", "U", "I", "O", "P", "Ü", "+"],
+  ["A", "S", "D", "F", "G", "H", "J", "K", "L", "Ö", "Ä", "#"],
+  ["<", "Y", "X", "C", "V", "B", "N", "M", ",", ".", "-"]
+];
+
+var letters = [];
+
+function letter(value, posX, velocity){
+  this.value = value;
+  this.position = {x: posX, y: 650};
+  this.velocity = velocity
+  this.mass = 0.1;
+  this.radius = 25;
+  this.restitution = -0.7;
+  this.life = 150;
+}
+
+var Cd = 0.47;  // Dimensionless
+var rho = 1.22; // kg / m^3
+var A = Math.PI * letter.radius * letter.radius / (10000); // m^2
+var ag = 9.81;  // m / s^2
+
+var keyDown = function(e) {
+
+        var xPos = width/2;
+        var key = String.fromCharCode(keynum).toUpperCase();
+
+        for(var j = 0; j < 4; j++){
+          for(var i = 0; i < keyboard[j].length; i++){
+            if(keyboard[j][i].toUpperCase() === key){
+              xPos = i * (width/keyboard[j].length);
+            }
+          }
+        }
+
+        var vel_x = Math.random() * (3 - 0) -1;
+        var vel_y = -Math.floor(Math.random() * (14 - 8) + 8);
+
+        switch(keynum) {
+          case 32: {
+            key = "Space";
+            xPos = 350;
+            break;
+          }
+          case 8: {
+            key = "Delete";
+            xPos = 8*(width/keyboard[0].length);
+            break;
+          }
+          case 13: {
+            key = "Enter";
+            xPos = 8*(width/keyboard[1].length);
+            break;
+          }
+
+        }
+
+        letters.push(new letter(key, xPos, {x: vel_x, y: vel_y}));
+}
+
+var keynum = 84;
+
+var setup = function() {
+    canvas = document.getElementById("canvas");
+    ctx = canvas.getContext("2d");
+
+    document.addEventListener('keydown', function(event) {
+        keynum = event.which;
+        keyDown();
+
+    });
+
+    ctx.strokeStyle = '#000000';
+    loopTimer = setInterval(loop, frameDelay);
+}
+
+var loop = function() {
+
+        ctx.clearRect(0,0,width,height);
+        ctx.save();
+        ctx.font="40px Verdana";
+
+        letters.forEach(function(letter) {
+
+
+          var Fx = -0.5 * Cd * A * rho * letter.velocity.x * letter.velocity.x * letter.velocity.x / Math.abs(letter.velocity.x);
+          var Fy = -0.5 * Cd * A * rho * letter.velocity.y * letter.velocity.y * letter.velocity.y / Math.abs(letter.velocity.y);
+
+          Fx = (isNaN(Fx) ? 0 : Fx);
+          Fy = (isNaN(Fy) ? 0 : Fy);
+
+              // Calculate acceleration ( F = ma )
+          var ax = Fx / letter.mass;
+          var ay = ag + (Fy / letter.mass);
+              // Integrate to get velocity
+          letter.velocity.y += ay*frameRate;
+          letter.velocity.x += ax*frameRate;
+
+              // Integrate to get position
+          letter.position.x += letter.velocity.x*frameRate*100;
+          letter.position.y += letter.velocity.y*frameRate*100;
+
+      // Handle collisions
+      if (letter.position.y > height - letter.radius) {
+          letter.velocity.y *= letter.restitution;
+          letter.position.y = height - letter.radius;
+      }
+      if (letter.position.y < letter.radius) {
+          letter.velocity.y *= letter.restitution;
+          letter.position.y = letter.radius;
+      }
+      if (letter.position.x > width - letter.radius) {
+          letter.velocity.x *= letter.restitution;
+          letter.position.x = width - letter.radius;
+      }
+      if (letter.position.x < letter.radius) {
+          letter.velocity.x *= letter.restitution;
+          letter.position.x = letter.radius;
+      }
+
+      var alpha = 1.0;
+
+      if(letter.life <= 50)
+        alpha = letter.life/50;
+      if(letter.life <= 1) {
+        letters.splice(0,1);
+      }
+
+      ctx.fillStyle = "rgba(66, 134, 244, " + alpha + ")";
+
+      ctx.translate(letter.position.x, letter.position.y);
+
+      ctx.fillText(letter.value, 0, 0);
+
+      ctx.translate(-letter.position.x, -letter.position.y);
+
+      letter.life--;
+
+
+
+  });
+
+  ctx.restore();
+
+}
+    setup();
+
+</script>
+</html>
