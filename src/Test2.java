@@ -62,56 +62,32 @@ public class Test2  {
         game = new Shoot();
        // window.setLayout(null);
        // window.add(game);
-      //  window.setOpacity(1f);
-      //  window.setBackground(new Color(0, 0, 0, 0));
+        window.setOpacity(1f);
+        window.setBackground(new Color(0, 0, 0, 0));
         window.setSize(new Dimension(300, 100));
         window.setAlwaysOnTop(true);
 
         window.setLocation(800, 600);
         window.setVisible(true);
 
+    }
 
-       /* int x=150;
-        for(int i=30; i>0; i--){
-        	x+=10;
-        try {
-			Thread.sleep(30);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        Rectangle bounds = new Rectangle(x, 50, 200, 20);
-    /*    while(true){
-        	try {
-				Thread.sleep(100);
+
+    public static void main(String[] Args) {
+
+                new Test2();
+
+
+       	while (true) {
+			window.repaint();
+			x+=10;
+			try {
+				Thread.sleep(10);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-        	bounds.x+=100;
-        	but.setBounds(bounds);
-        //}
-        }*/
-    }
-
-    public static void main(String[] Args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-
-                new Test2();
-               	while (true) {
-        			window.repaint();
-        			x+=10;
-        			try {
-        				Thread.sleep(10);
-        			} catch (InterruptedException e) {
-        				// TODO Auto-generated catch block
-        				e.printStackTrace();
-        			}
-        		}
-            }
-        });
+		}
     }
 
     @SuppressWarnings("unused")
